@@ -1,4 +1,7 @@
 import argparse
+import os
+from pathlib import Path
+import sys
 
 def main():
     # Process the command line arguments using the built in parser
@@ -27,7 +30,18 @@ def main():
 
 
 def init():
-    ...
+    try:
+        Path("./.mygit").mkdir()
+    except FileExistsError:
+        sys.exit("Repository already initialized")
+    else:
+        Path("./.mygit/objects").mkdir()
+        Path("./.mygit/commits").mkdir()
+        Path("./.mygit/index.json").touch()
+        Path("./.mygit/index.json").write_text("{}")
+        Path("./.mygit/HEAD").touch()
+        Path("./.mygit/HEAD").write_bytes(b"null")
+
 
 def add(file_path):
     ...
