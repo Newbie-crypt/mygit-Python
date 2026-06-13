@@ -47,15 +47,15 @@ def valid_init_input(paths):
 
 
 def init(paths):
-    # git init <one directory path>
-    # if the directory does not exist, make a new directory with the .mygit files
-    # if it does, just add the new files.
-    # if the .mygit files already exist, exit.
+
+    # If no path is provided, then add the .mygit to the current directory
     if not paths:
         directory = '.'
     else:
         directory = paths[0]
     
+    if not Path(directory).exists():
+        Path(directory).mkdir()
 
     try:
         Path(f"{directory}/.mygit").mkdir()
