@@ -152,16 +152,16 @@ def test_commit_with_staged_files_with_parent_commit(tmp_path):
 
     # First commit
     p.write_text("Hello World\n")
-    add([path])
-    first_commit_id, first_files = commit("first commit")
+    add([filename], repo_directory=str(tmp_path))
+    first_commit_id, first_files = commit("first commit", repo_directory=str(tmp_path))
 
     # Second Commit
-    file.write_text("Hello, again\n")
-    add([path])
-    second_commit_id, second_files = commit("second commit")
+    p.write_text("Hello, again\n")
+    add([filename], repo_directory=str(tmp_path))
+    second_commit_id, second_files = commit("second commit", repo_directory=str(tmp_path))
 
     # Ensuring that there are two commit files..
-    commit_files = list(Path(".mygit/commits").glob("*.json"))
+    commit_files = list(Path(f"{str(tmp_path)}/.mygit/commits").glob("*.json"))
     assert len(commit_files) == 2
 
     for file in commit_files:
