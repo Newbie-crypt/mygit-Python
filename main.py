@@ -117,26 +117,26 @@ def commit(message):
         commit_parent = f.read()
 
     # Setting up the files to be committed..
-    files = {}
+    with open("./.mygit/index.json", "r") as f:
+        files = json.load(f)
+        
     if commit_parent != "null":
         with open(f"./.mygit/{commit_parent}.json", "r") as f:
             commit_parent_json = json.load(f)
-        with open("./.mygit/index.json", "r") as f:
-            files = json.load(f)
 
         for key in commit_parent_json:
             if key not in files:
                 files[key] = commit_parent_json[key]
 
     # Setting up the data to be stored in the commit json file
-    commit_id = uuid.uuid4().hex
     commit_data = {
-        "id": commit_id,
         "parent_commit": commit_parent,
         "message": message,
-        "timestamp": datetime.now(),
+        "timestamp": datetime.datetime.now().timestamp(),
         "files": files
     }
+
+    commit_id = hashlib.sha256(json.dumps(commit_data).encode("utf-8")).hexdigest()
 
     # Creating the json file..
     with open(f".mygit/commits/{commit_id}.json", 'w') as f:
