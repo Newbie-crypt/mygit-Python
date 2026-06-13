@@ -137,6 +137,8 @@ def test_commit_with_staged_files_with_null_parent_commit():
     hash = hashlib.sha256(contents).hexdigest()
     commit_message = "test commit"
     commit(commit_message)
+
+    # Ensuring that the commit json is correct
     commit_files = list(Path(".mygit/commits").glob("*.json"))
     assert len(commit_files) == 1
     with open(str(commit_files[0]), 'r') as f:
@@ -144,15 +146,37 @@ def test_commit_with_staged_files_with_null_parent_commit():
     assert contents["parent_commit"] == "null"
     assert contents["message"] == commit_message
     assert contents["files"] == {path: hash}
+    
+    # Ensuring that the HEAD pointer is updated
+    with open(".mygit/HEAD", 'r') as f:
+        id = f.read()
+    assert id != "null"
+
+    # Ensuring that the staging area is cleared
+    with open(".mygit/index.json", 'r') as f:
+        contents = json.load(f)
+    assert not contents
 
     # Removing files and .mygit
     file.unlink()
     shutil.rmtree(".mygit")
 
-
-
 def test_commit_with_staged_files_with_parent_commit():
-    ...
+    init([])
+    path = "./test.txt"
+    file = Path(path)
+    file.touch()
+    file.write_text("Hello World\n")
+    add([path])
+    # with open(path, "rb") as f:
+    #     contents = f.read()
+    # hash = hashlib.sha256(contents).hexdigest()
+    commit("first commit")
+
+
+    # Removing files and .mygit
+    file.unlink()
+    shutil.rmtree(".mygit")
     
 
     
