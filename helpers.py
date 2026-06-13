@@ -15,4 +15,6 @@ def valid_add_input(paths):
 
 
 def files_exist(paths):
-    ...
+    for path in paths:
+        if not Path(path).exists():
+            return False
