@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import sys
 import hashlib
+import json
 
 
 # we want to make sure of the following:
@@ -18,8 +19,8 @@ def valid_add_input(paths):
 def files_exist(paths):
     for path in paths:
         if not Path(path).exists():
-            return False
-    return True
+            return (False, path)
+    return (True, "null")
         
 def is_repository_initialized():
     if not Path("./.mygit").exists():

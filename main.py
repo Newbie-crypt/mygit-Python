@@ -63,18 +63,40 @@ def init(paths):
     
 
 def add(paths):
-    # Check whether we have the .mygit directory
-    # Check whether the paths exist
-    # Read the file contents in binary
-    # Compute the hash value according to the file contents
-    # Store the file in the objects directory
-    # (Avoid duplicate objects)
-    # Record the file in index.json ("main.py": "abc...")
-    # If it's already present, update it in the json
+    # Check whether we have the .mygit directory /
+    # Check whether the paths exist /
+    # Read the file contents in binary /
+    # Compute the hash value according to the file contents /
+    # Store the file in the objects directory /
+    # (Avoid duplicate objects) /
+    # Record the file in index.json ("main.py": "abc...") /
+    # If it's already present, update it in the json /
 
     is_repository_initialized()
 
+    if not files_exist(paths)[0]:
+        sys.exit(f"{paths[1]} does not exist.")
+
+    for path in paths:
+        with open(path, "rb") as file:
+            contents = file.read()
+        hash = hashlib.sha256(contents).hexdigest()
+        output_path = "./.mygit/objects/" + hash
+        if not Path(output_path).exists():
+            # Making the new file...
+            with open(output_path, "wb") as file:
+                file.write(contents)
+
+        # Updating the index
+        with open("./.mygit/index.json", "r") as f:
+            index = json.load(f)
+        
+        index[path] = hash
+
+        with open("./.mygit/index.json", "w") as f:
+            json.dump(index, f, indent=4)
     
+
 
 def reset():
     ...

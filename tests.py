@@ -46,7 +46,7 @@ def test_is_repository_initialized():
 
 def test_files_exist():
     assert files_exist(["main.py", "helpers.py"]) == True
-    assert files_exist(["foo", "bar"]) == False
+    assert files_exist(["foo", "bar"]) == (False, "foo")
     
 
     
