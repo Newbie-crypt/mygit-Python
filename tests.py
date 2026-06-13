@@ -118,6 +118,15 @@ def test_empty_index():
     # Removing files and .mygit
     file.unlink()
     shutil.rmtree(".mygit")
+
+def test_commit_with_no_staged_files():
+    ...
+
+def test_commit_with_staged_files_with_null_parent_commit():
+    ...
+
+def test_commit_with_staged_files_with_parent_commit():
+    ...
     
 
     

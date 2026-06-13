@@ -95,17 +95,62 @@ def add(paths):
     
 
 def commit(message):
-    # Check whether repo is initialized
-    # Check whether the staging area (index.json) is not empty
-    # read current HEAD
-    # create a <commit id>.json file (id is generated using uuid)
-    # the file contains: id, parent commit, commit message, timestamp, files
-    # file is stored in commits directory
-    # update HEAD
-    # clear index.json (staging area)
+    # Check whether repo is initialized /
+    # Check whether the staging area (index.json) is not empty /
+    # read current HEAD /
+    # create a <commit id>.json file (id is generated using uuid) /
+    # the file contains: id, parent commit, commit message, timestamp, files /
+        # if parent is not null.. /
+        # load the files dict from the commit.json file /
+        # iterate through the dict in index.json /
+        # update the files dict with the iteration /
+    # file is stored in commits directory /
+    # update HEAD /
+    # clear index.json (staging area) /
     is_repository_initialized()
     
+    if empty_index():
+        sys.exit("No files present in the staging area.")
+    
+    # Obtaining the commit parent..
+    with open(".mygit/HEAD", 'r') as f:
+        commit_parent = f.read()
 
+    # Setting up the files to be committed..
+    files = {}
+    if commit_parent != "null":
+        with open(f"./.mygit/{commit_parent}.json", "r") as f:
+            commit_parent_json = json.load(f)
+        with open("./.mygit/index.json", "r") as f:
+            files = json.load(f)
+
+        for key in commit_parent_json:
+            if key not in files:
+                files[key] = commit_parent_json[key]
+
+    # Setting up the data to be stored in the commit json file
+    commit_id = uuid.uuid4().hex
+    commit_data = {
+        "id": commit_id,
+        "parent_commit": commit_parent,
+        "message": message,
+        "timestamp": datetime.now(),
+        "files": files
+    }
+
+    # Creating the json file..
+    with open(f".mygit/commits/{commit_id}.json", 'w') as f:
+        json.dump(commit_data, f, indent=4)
+
+    # Update HEAD
+    with open(".mygit/HEAD", 'w') as f:
+        f.write(commit_id)
+    
+    # Clearing the staging area (index.json)
+    with open(".mygit/index.json", 'w') as f:
+        f.write("{}")
+    
+    
 
 def reset():
     ...

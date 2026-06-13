@@ -4,6 +4,8 @@ from pathlib import Path
 import sys
 import hashlib
 import json
+import uuid
+import datetime
 
 
 # we want to make sure of the following:
@@ -31,3 +33,4 @@ def empty_index():
     with open("./.mygit/index.json", "r") as f:
         index = json.load(f)
     return not index
+
