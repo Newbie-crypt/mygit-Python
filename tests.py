@@ -173,11 +173,11 @@ def test_commit_with_staged_files_with_parent_commit(tmp_path):
             assert contents["files"] == second_files
 
     
-# def test_checkout_invalid_commitID():
-#     ...
+def test_checkout_invalid_commitID():
+    ...
 
-# def test_checkout_valid_commitID():
-#     ...
+def test_checkout_valid_commitID():
+    ...
     
 
     

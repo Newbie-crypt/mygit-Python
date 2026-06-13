@@ -102,16 +102,6 @@ def commit(message, repo_directory='.'):
     
 
 def checkout(commit_id):
-    # Check whether repo is initialized /
-    # Check whether commit id exists (check the commit files in /commits) /
-    # Restore the files in the snapshot (by creating or overwriting) /
-        # loop through the files dict in the commit
-        # read the contents of one key (in binary)
-        # write the contents to the file which has the name of the key
-    # Delete files that are not present in the snapshot /
-    # NEVER DELETE .mygit /
-    # Update HEAD /
-    # clear staging area /
     is_repository_initialized()
 
     # Ensuring the commit id exists..
@@ -149,11 +139,6 @@ def checkout(commit_id):
     with open(".mygit/index.json", 'w') as f:
         f.write("{}")
     
-
-
-
-
-
 def log():
     ...
 
