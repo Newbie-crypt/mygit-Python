@@ -24,31 +24,31 @@ def init(paths):
         Path(f"{directory}/.mygit/HEAD").write_bytes(b"null")
     
 
-def add(paths):
+def add(paths, repo_directory='.'):
 
-    is_repository_initialized()
+    is_repository_initialized(repo_directory=repo_directory)
 
-    if not files_exist(paths)[0]:
-        sys.exit(f"{paths[1]} does not exist.")
+    if not files_exist(paths, repo_directory=repo_directory)[0]:
+        sys.exit(f"{paths[0]} does not exist.")
 
     for path in paths:
         path = path.replace("./","").replace(".\\", "")
-        with open(path, "rb") as file:
+        with open(f"{repo_directory}/{path}", "rb") as file:
             contents = file.read()
         hash = hashlib.sha256(contents).hexdigest()
-        output_path = "./.mygit/objects/" + hash
+        output_path = f"{repo_directory}/.mygit/objects/" + hash
         if not Path(output_path).exists():
             # Making the new file...
             with open(output_path, "wb") as file:
                 file.write(contents)
 
             # Updating the index
-            with open("./.mygit/index.json", "r") as f:
+            with open(f"{repo_directory}/.mygit/index.json", "r") as f:
                 index = json.load(f)
             
             index[path] = hash
 
-            with open("./.mygit/index.json", "w") as f:
+            with open(f"{repo_directory}/.mygit/index.json", "w") as f:
                 json.dump(index, f, indent=4)
     
 
