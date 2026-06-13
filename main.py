@@ -10,6 +10,8 @@ def main():
     add_parser.add_argument("files", nargs="+")
     commit_parser = subparsers.add_parser("commit")
     commit_parser.add_argument("message", nargs=1)
+    checkout_parser = subparsers.add_parser("checkout")
+    checkout_parser.add_argument("commit_id", nargs=1)
 
     args = parser.parse_args()
     execute_command(args)
@@ -32,6 +34,9 @@ def execute_command(args):
             
         case "commit":
             commit(args.message)
+
+        case "checkout":
+            checkout(args.commit_id)
 
         case "log":
             log()
@@ -96,18 +101,6 @@ def add(paths):
     
 
 def commit(message):
-    # Check whether repo is initialized /
-    # Check whether the staging area (index.json) is not empty /
-    # read current HEAD /
-    # create a <commit id>.json file (id is generated using uuid) /
-    # the file contains: id, parent commit, commit message, timestamp, files /
-        # if parent is not null.. /
-        # load the files dict from the commit.json file /
-        # iterate through the dict in index.json /
-        # update the files dict with the iteration /
-    # file is stored in commits directory /
-    # update HEAD /
-    # clear index.json (staging area) /
     is_repository_initialized()
     
     if empty_index():
@@ -156,8 +149,54 @@ def commit(message):
     
     
 
-def reset():
-    ...
+def checkout(commit_id):
+    # Check whether repo is initialized /
+    # Check whether commit id exists (check the commit files in /commits) /
+    # Restore the files in the snapshot (by creating or overwriting) /
+        # loop through the files dict in the commit
+        # read the contents of one key (in binary)
+        # write the contents to the file which has the name of the key
+    # Delete files that are not present in the snapshot /
+    # NEVER DELETE .mygit /
+    # Update HEAD /
+    # clear staging area /
+    is_repository_initialized()
+
+    # Ensuring the commit id exists..
+    path = f".mygit/commits/{commit_id}.json"
+    if not Path(path).exists():
+        sys.exit("Invalid Commit ID")
+
+    # Creating/Overwriting files..
+    with open(path, 'r') as f:
+        contents = json.load(f)
+    files = contents["files"]
+    for key in files:
+        with open(f".mygit/objects/{files[key]}", "rb") as f:
+            input_data = f.read()
+        with open(key, "wb") as f:
+            f.write(input_data)
+    
+    # Removing files/directories not present in the snapshot...
+    current_directory_files = list(Path(".").glob("*"))
+    for file in current_directory_files:
+        if file not in files and ".mygit" not in str(file):
+            if file.is_file():
+                file.unlink()          # remove file
+            elif file.is_dir():
+                shutil.rmtree(file)  
+    
+    # Changing the HEAD..
+    with open(".mygit/HEAD", 'w') as f:
+        f.write(commit_id)
+    
+    # Clearing the staging area (index.json)
+    with open(".mygit/index.json", 'w') as f:
+        f.write("{}")
+    
+
+
+
 
 
 def log():

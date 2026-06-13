@@ -6,6 +6,7 @@ import hashlib
 import json
 import uuid
 import datetime
+import shutil
 
 
 # we want to make sure of the following:

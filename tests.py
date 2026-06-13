@@ -1,8 +1,6 @@
 import pytest
 from main import *
 from helpers import *
-from pathlib import Path
-import shutil
 
 def test_execute_command():
     ...
@@ -190,7 +188,11 @@ def test_commit_with_staged_files_with_parent_commit():
     file.unlink()
     shutil.rmtree(".mygit")
     
+def test_checkout_invalid_commitID():
+    ...
 
+def test_checkout_valid_commitID():
+    ...
     
 
     
