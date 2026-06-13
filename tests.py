@@ -132,11 +132,8 @@ def test_commit_with_staged_files_with_null_parent_commit():
     file.touch()
     file.write_text("Hello World\n")
     add([path])
-    with open(path, "rb") as f:
-        contents = f.read()
-    hash = hashlib.sha256(contents).hexdigest()
     commit_message = "test commit"
-    commit(commit_message)
+    commit_id, files = commit(commit_message)
 
     # Ensuring that the commit json is correct
     commit_files = list(Path(".mygit/commits").glob("*.json"))
@@ -145,12 +142,12 @@ def test_commit_with_staged_files_with_null_parent_commit():
         contents = json.load(f)
     assert contents["parent_commit"] == "null"
     assert contents["message"] == commit_message
-    assert contents["files"] == {path: hash}
+    assert contents["files"] == files
     
     # Ensuring that the HEAD pointer is updated
     with open(".mygit/HEAD", 'r') as f:
         id = f.read()
-    assert id != "null"
+    assert id == commit_id
 
     # Ensuring that the staging area is cleared
     with open(".mygit/index.json", 'r') as f:
@@ -166,13 +163,28 @@ def test_commit_with_staged_files_with_parent_commit():
     path = "./test.txt"
     file = Path(path)
     file.touch()
+
+    # First commit
     file.write_text("Hello World\n")
     add([path])
-    # with open(path, "rb") as f:
-    #     contents = f.read()
-    # hash = hashlib.sha256(contents).hexdigest()
-    commit("first commit")
+    first_commit_id, first_files = commit("first commit")
 
+    # Second Commit
+    file.write_text("Hello, again\n")
+    add([path])
+    second_commit_id, second_files = commit("second commit")
+
+    # Ensuring that there are two commit files..
+    commit_files = list(Path(".mygit/commits").glob("*.json"))
+    assert len(commit_files) == 2
+
+    for file in commit_files:
+        if second_commit_id in str(file):
+            with open(str(file), 'r') as f:
+                contents = json.load(f)
+            assert contents["parent_commit"] == first_commit_id
+            assert contents["message"] == "second commit"
+            assert contents["files"] == second_files
 
     # Removing files and .mygit
     file.unlink()

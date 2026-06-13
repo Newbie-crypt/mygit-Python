@@ -75,6 +75,7 @@ def add(paths):
         sys.exit(f"{paths[1]} does not exist.")
 
     for path in paths:
+        path = path.replace("./","").replace(".\\", "")
         with open(path, "rb") as file:
             contents = file.read()
         hash = hashlib.sha256(contents).hexdigest()
@@ -84,14 +85,14 @@ def add(paths):
             with open(output_path, "wb") as file:
                 file.write(contents)
 
-        # Updating the index
-        with open("./.mygit/index.json", "r") as f:
-            index = json.load(f)
-        
-        index[path] = hash
+            # Updating the index
+            with open("./.mygit/index.json", "r") as f:
+                index = json.load(f)
+            
+            index[path] = hash
 
-        with open("./.mygit/index.json", "w") as f:
-            json.dump(index, f, indent=4)
+            with open("./.mygit/index.json", "w") as f:
+                json.dump(index, f, indent=4)
     
 
 def commit(message):
@@ -119,14 +120,14 @@ def commit(message):
     # Setting up the files to be committed..
     with open("./.mygit/index.json", "r") as f:
         files = json.load(f)
-        
+
     if commit_parent != "null":
-        with open(f"./.mygit/{commit_parent}.json", "r") as f:
+        with open(f"./.mygit/commits/{commit_parent}.json", "r") as f:
             commit_parent_json = json.load(f)
 
-        for key in commit_parent_json:
+        for key in commit_parent_json["files"]:
             if key not in files:
-                files[key] = commit_parent_json[key]
+                files[key] = commit_parent_json["files"][key]
 
     # Setting up the data to be stored in the commit json file
     commit_data = {
@@ -149,6 +150,9 @@ def commit(message):
     # Clearing the staging area (index.json)
     with open(".mygit/index.json", 'w') as f:
         f.write("{}")
+
+    # Returned for unit testing purposes
+    return commit_id, files
     
     
 
