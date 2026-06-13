@@ -45,8 +45,23 @@ def test_is_repository_initialized():
         is_repository_initialized()
 
 def test_files_exist():
-    assert files_exist(["main.py", "helpers.py"]) == True
+    assert files_exist(["main.py", "helpers.py"]) == (True, "null")
     assert files_exist(["foo", "bar"]) == (False, "foo")
+
+def test_correct_use_of_add():
+    init([])
+    add(["main.py"])
+    with open("main.py", "rb") as f:
+        contents = f.read()
+    hash = hashlib.sha256(contents).hexdigest()
+    output_path = "./.mygit/objects/" + hash
+    assert Path(output_path).exists() == True
+
+    with open("./.mygit/index.json", "r") as f:
+        index = json.load(f)
+    assert index == {"main.py": hash}
+    shutil.rmtree(".mygit")
+
     
 
     
