@@ -1,28 +1,32 @@
 from helpers import *
 
 def main():
-    # Process the command line arguments using the built in parser
-    # Use a match statement to identify the user's action
-    # Execute the action
+    # Setting up the Parsers..
     parser = argparse.ArgumentParser(description="A simple reimplementation of git!")
-    parser.add_argument("command", type=str, help="commands include init, add, commit, reset and so on!")
-    parser.add_argument("paths", type=str, help="input files", nargs='*')
+    subparsers = parser.add_subparsers(dest="command")
+    init_parser = subparsers.add_parser("init")
+    init_parser.add_argument("files", nargs='*')
+    add_parser = subparsers.add_parser("add")
+    add_parser.add_argument("files", nargs="+")
+    commit_parser = subparsers.add_parser("commit")
+    commit_parser.add_argument("message", nargs=1)
+
     args = parser.parse_args()
-    execute_command(args.command, args.paths)
+    execute_command(args)
 
 
-def execute_command(command, paths):
-    match command:
+def execute_command(args):
+    match args.command:
         
         case "init":
-            if valid_init_input(paths):
-                init(paths)
+            if valid_init_input(args.files):
+                init(args.files)
             else:
                 sys.exit("Invalid Input format; mygit init <one file path>")
     
         case "add":
-            if valid_add_input(paths):
-                add(paths)
+            if valid_add_input(args.files):
+                add(args.files)
             else:
                 sys.exit("Invalid Input format; mygit add <one or more paths>")
             
@@ -33,10 +37,6 @@ def execute_command(command, paths):
             log()
         case "status":
             status()    
-
-
-
-
 
 def init(paths):
 
@@ -97,12 +97,12 @@ def add(paths):
             json.dump(index, f, indent=4)
     
 
+def commit(message):
+    ...
 
 def reset():
     ...
 
-def commit(message):
-    ...
 
 def log():
     ...
