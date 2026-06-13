@@ -2,6 +2,7 @@ import argparse
 import os
 from pathlib import Path
 import sys
+import hashlib
 
 
 # we want to make sure of the following:
@@ -18,3 +19,9 @@ def files_exist(paths):
     for path in paths:
         if not Path(path).exists():
             return False
+    return True
+        
+def is_repository_initialized():
+    if not Path("./.mygit").exists():
+        sys.exit("Repository not initialized")
+    return True

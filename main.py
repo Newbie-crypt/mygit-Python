@@ -62,8 +62,19 @@ def init(paths):
         Path(f"{directory}/.mygit/HEAD").write_bytes(b"null")
     
 
-def add(file_path):
-    ...
+def add(paths):
+    # Check whether we have the .mygit directory
+    # Check whether the paths exist
+    # Read the file contents in binary
+    # Compute the hash value according to the file contents
+    # Store the file in the objects directory
+    # (Avoid duplicate objects)
+    # Record the file in index.json ("main.py": "abc...")
+    # If it's already present, update it in the json
+
+    is_repository_initialized()
+
+    
 
 def reset():
     ...
