@@ -30,8 +30,8 @@ def is_repository_initialized(repo_directory='.'):
         sys.exit("Repository not initialized")
     return True
 
-def empty_index():
-    with open("./.mygit/index.json", "r") as f:
+def empty_index(repo_directory='.'):
+    with open(f"{repo_directory}/.mygit/index.json", "r") as f:
         index = json.load(f)
     return not index
 

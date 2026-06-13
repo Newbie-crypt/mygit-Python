@@ -52,22 +52,22 @@ def add(paths, repo_directory='.'):
                 json.dump(index, f, indent=4)
     
 
-def commit(message):
-    is_repository_initialized()
+def commit(message, repo_directory='.'):
+    is_repository_initialized(repo_directory=repo_directory)
     
-    if empty_index():
+    if empty_index(repo_directory=repo_directory):
         sys.exit("No files present in the staging area.")
     
     # Obtaining the commit parent..
-    with open(".mygit/HEAD", 'r') as f:
+    with open(f"{repo_directory}/.mygit/HEAD", 'r') as f:
         commit_parent = f.read()
 
     # Setting up the files to be committed..
-    with open("./.mygit/index.json", "r") as f:
+    with open(f"{repo_directory}/.mygit/index.json", "r") as f:
         files = json.load(f)
 
     if commit_parent != "null":
-        with open(f"./.mygit/commits/{commit_parent}.json", "r") as f:
+        with open(f"{repo_directory}/.mygit/commits/{commit_parent}.json", "r") as f:
             commit_parent_json = json.load(f)
 
         for key in commit_parent_json["files"]:
@@ -85,15 +85,15 @@ def commit(message):
     commit_id = hashlib.sha256(json.dumps(commit_data).encode("utf-8")).hexdigest()
 
     # Creating the json file..
-    with open(f".mygit/commits/{commit_id}.json", 'w') as f:
+    with open(f"{repo_directory}/.mygit/commits/{commit_id}.json", 'w') as f:
         json.dump(commit_data, f, indent=4)
 
     # Update HEAD
-    with open(".mygit/HEAD", 'w') as f:
+    with open(f"{repo_directory}/.mygit/HEAD", 'w') as f:
         f.write(commit_id)
     
     # Clearing the staging area (index.json)
-    with open(".mygit/index.json", 'w') as f:
+    with open(f"{repo_directory}/.mygit/index.json", 'w') as f:
         f.write("{}")
 
     # Returned for unit testing purposes

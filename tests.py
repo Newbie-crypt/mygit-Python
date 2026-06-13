@@ -97,90 +97,81 @@ def test_add_no_duplicates(tmp_path):
     assert index == {filename: hash}
 
 
-# def test_empty_index():
-#     init([])
-#     assert empty_index() == True
-#     path = "./test.txt"
-#     file = Path(path)
-#     file.touch()
-#     file.write_text("Hello World\n")
-#     add([path])
-#     assert empty_index() == False
+def test_empty_index(tmp_path):
+    init([str(tmp_path)])
+    assert empty_index(str(tmp_path)) == True
+    filename = "hello.txt"
+    p = tmp_path / filename
+    p.touch()
+    p.write_text("hello")
+    path = str(p)
+    add([filename], repo_directory=str(tmp_path))
+    assert empty_index(str(tmp_path)) == False
 
-#     # Removing files and .mygit
-#     file.unlink()
-#     shutil.rmtree(".mygit")
+def test_commit_with_no_staged_files(tmp_path):
+    init([str(tmp_path)])
+    with pytest.raises(SystemExit):
+        commit("foo")
 
-# def test_commit_with_no_staged_files():
-#     init([])
-#     with pytest.raises(SystemExit):
-#         commit("foo")
-#     shutil.rmtree(".mygit")
+def test_commit_with_staged_files_with_null_parent_commit(tmp_path):
+    init([str(tmp_path)])
+    filename = "hello.txt"
+    p = tmp_path / filename
+    p.touch()
+    p.write_text("hello")
+    path = str(p)
+    add([filename], repo_directory=str(tmp_path))
+    commit_message = "test commit"
+    commit_id, files = commit(commit_message, repo_directory=str(tmp_path))
 
-# def test_commit_with_staged_files_with_null_parent_commit():
-#     init([])
-#     path = "./test.txt"
-#     file = Path(path)
-#     file.touch()
-#     file.write_text("Hello World\n")
-#     add([path])
-#     commit_message = "test commit"
-#     commit_id, files = commit(commit_message)
-
-#     # Ensuring that the commit json is correct
-#     commit_files = list(Path(".mygit/commits").glob("*.json"))
-#     assert len(commit_files) == 1
-#     with open(str(commit_files[0]), 'r') as f:
-#         contents = json.load(f)
-#     assert contents["parent_commit"] == "null"
-#     assert contents["message"] == commit_message
-#     assert contents["files"] == files
+    # Ensuring that the commit json is correct
+    commit_files = list(Path(f"{str(tmp_path)}/.mygit/commits").glob("*.json"))
+    assert len(commit_files) == 1
+    with open(str(commit_files[0]), 'r') as f:
+        contents = json.load(f)
+    assert contents["parent_commit"] == "null"
+    assert contents["message"] == commit_message
+    assert contents["files"] == files
     
-#     # Ensuring that the HEAD pointer is updated
-#     with open(".mygit/HEAD", 'r') as f:
-#         id = f.read()
-#     assert id == commit_id
+    # Ensuring that the HEAD pointer is updated
+    with open(f"{str(tmp_path)}/.mygit/HEAD", 'r') as f:
+        id = f.read()
+    assert id == commit_id
 
-#     # Ensuring that the staging area is cleared
-#     with open(".mygit/index.json", 'r') as f:
-#         contents = json.load(f)
-#     assert not contents
+    # Ensuring that the staging area is cleared
+    with open(f"{str(tmp_path)}/.mygit/index.json", 'r') as f:
+        contents = json.load(f)
+    assert not contents
 
-#     # Removing files and .mygit
-#     file.unlink()
-#     shutil.rmtree(".mygit")
+def test_commit_with_staged_files_with_parent_commit(tmp_path):
+    init([str(tmp_path)])
+    filename = "hello.txt"
+    p = tmp_path / filename
+    p.touch()
+    path = str(p)
 
-# def test_commit_with_staged_files_with_parent_commit():
-#     init([])
-#     path = "./test.txt"
-#     file = Path(path)
-#     file.touch()
+    # First commit
+    p.write_text("Hello World\n")
+    add([path])
+    first_commit_id, first_files = commit("first commit")
 
-#     # First commit
-#     file.write_text("Hello World\n")
-#     add([path])
-#     first_commit_id, first_files = commit("first commit")
+    # Second Commit
+    file.write_text("Hello, again\n")
+    add([path])
+    second_commit_id, second_files = commit("second commit")
 
-#     # Second Commit
-#     file.write_text("Hello, again\n")
-#     add([path])
-#     second_commit_id, second_files = commit("second commit")
+    # Ensuring that there are two commit files..
+    commit_files = list(Path(".mygit/commits").glob("*.json"))
+    assert len(commit_files) == 2
 
-#     # Ensuring that there are two commit files..
-#     commit_files = list(Path(".mygit/commits").glob("*.json"))
-#     assert len(commit_files) == 2
+    for file in commit_files:
+        if second_commit_id in str(file):
+            with open(str(file), 'r') as f:
+                contents = json.load(f)
+            assert contents["parent_commit"] == first_commit_id
+            assert contents["message"] == "second commit"
+            assert contents["files"] == second_files
 
-#     for file in commit_files:
-#         if second_commit_id in str(file):
-#             with open(str(file), 'r') as f:
-#                 contents = json.load(f)
-#             assert contents["parent_commit"] == first_commit_id
-#             assert contents["message"] == "second commit"
-#             assert contents["files"] == second_files
-
-#     # Removing files and .mygit
-#     file.unlink()
-#     shutil.rmtree(".mygit")
     
 # def test_checkout_invalid_commitID():
 #     ...
