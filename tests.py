@@ -62,6 +62,52 @@ def test_correct_use_of_add():
     assert index == {"main.py": hash}
     shutil.rmtree(".mygit")
 
+def test_correct_use_of_add_after_updating_staged_file():
+    init([])
+    path = "./test.txt"
+    file = Path(path)
+    file.touch()
+    file.write_text("Hello World\n")
+    add([path])
+
+    file.write_text("Hello again.\n")
+    add([path])
+    with open(path, "rb") as f:
+        contents = f.read()
+    hash = hashlib.sha256(contents).hexdigest()
+    output_path = "./.mygit/objects/" + hash
+    assert Path(output_path).exists() == True
+
+    with open("./.mygit/index.json", "r") as f:
+        index = json.load(f)
+    assert index == {path: hash}
+
+    # Removing files and .mygit
+    file.unlink()
+    shutil.rmtree(".mygit")
+
+def test_add_no_duplicates():
+    init([])
+    path = "./test.txt"
+    file = Path(path)
+    file.touch()
+    file.write_text("Hello World\n")
+    with open(path, "rb") as f:
+        contents = f.read()
+    hash = hashlib.sha256(contents).hexdigest()
+    add([path])
+    add([path])
+    with open("./.mygit/index.json", "r") as f:
+        index = json.load(f)
+    assert index == {path: hash}
+
+    # Removing files and .mygit
+    file.unlink()
+    shutil.rmtree(".mygit")
+
+    
+    
+
     
 
     
