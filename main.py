@@ -31,12 +31,17 @@ def execute_command(args):
                 sys.exit("Invalid Input format; mygit add <one or more paths>")
             
         case "commit":
-            # Call Commit with a message
-            ...
+            commit(args.message)
+
         case "log":
             log()
+
         case "status":
-            status()    
+            status() 
+
+        case _:
+            sys.exit("Unknown command")
+
 
 def init(paths):
 
@@ -63,14 +68,6 @@ def init(paths):
     
 
 def add(paths):
-    # Check whether we have the .mygit directory /
-    # Check whether the paths exist /
-    # Read the file contents in binary /
-    # Compute the hash value according to the file contents /
-    # Store the file in the objects directory /
-    # (Avoid duplicate objects) /
-    # Record the file in index.json ("main.py": "abc...") /
-    # If it's already present, update it in the json /
 
     is_repository_initialized()
 
@@ -98,7 +95,17 @@ def add(paths):
     
 
 def commit(message):
-    ...
+    # Check whether repo is initialized
+    # Check whether the staging area (index.json) is not empty
+    # read current HEAD
+    # create a <commit id>.json file (id is generated using uuid)
+    # the file contains: id, parent commit, commit message, timestamp, files
+    # file is stored in commits directory
+    # update HEAD
+    # clear index.json (staging area)
+    is_repository_initialized()
+    
+
 
 def reset():
     ...

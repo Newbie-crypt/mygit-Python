@@ -105,7 +105,19 @@ def test_add_no_duplicates():
     file.unlink()
     shutil.rmtree(".mygit")
 
-    
+def test_empty_index():
+    init([])
+    assert empty_index() == True
+    path = "./test.txt"
+    file = Path(path)
+    file.touch()
+    file.write_text("Hello World\n")
+    add([path])
+    assert empty_index() == False
+
+    # Removing files and .mygit
+    file.unlink()
+    shutil.rmtree(".mygit")
     
 
     

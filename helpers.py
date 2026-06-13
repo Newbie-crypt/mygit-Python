@@ -26,3 +26,8 @@ def is_repository_initialized():
     if not Path("./.mygit").exists():
         sys.exit("Repository not initialized")
     return True
+
+def empty_index():
+    with open("./.mygit/index.json", "r") as f:
+        index = json.load(f)
+    return not index
