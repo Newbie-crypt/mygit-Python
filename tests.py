@@ -1,5 +1,6 @@
 import pytest
-from main import init, add, reset, commit, log, status, valid_init_input
+from main import *
+from helpers import *
 from pathlib import Path
 
 
@@ -29,5 +30,10 @@ def test_init_another_directory():
     assert Path(f"{directory}/.mygit/commits").is_dir()
     assert Path(f"{directory}/.mygit/index.json").exists()
     assert Path(f"{directory}/.mygit/HEAD").exists()
+
+def test_valid_add_input():
+    assert valid_add_input([]) == False
+    assert valid_add_input(["foo"]) == True
+    assert valid_add_input(["foo", "bar"]) == True
     
 

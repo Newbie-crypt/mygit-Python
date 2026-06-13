@@ -1,7 +1,4 @@
-import argparse
-import os
-from pathlib import Path
-import sys
+from helpers import *
 
 def main():
     # Process the command line arguments using the built in parser
@@ -11,7 +8,6 @@ def main():
     parser.add_argument("command", type=str, help="commands include init, add, commit, reset and so on!")
     parser.add_argument("paths", type=str, help="input files", nargs='*')
     args = parser.parse_args()
-    print(args.paths)
     execute_command(args.command, args.paths)
 
 
@@ -25,11 +21,11 @@ def execute_command(command, paths):
                 sys.exit("Invalid Input format; mygit init <one file path>")
     
         case "add":
-            # Figure out how to identify the file_path and/or filenames
-            ...
-        case "reset":
-            # (the reverse of add)
-            ...
+            if valid_add_input(paths):
+                add(paths)
+            else:
+                sys.exit("Invalid Input format; mygit add <one or more paths>")
+            
         case "commit":
             # Call Commit with a message
             ...
@@ -40,10 +36,6 @@ def execute_command(command, paths):
 
 
 
-# we want to make sure of the following:
-# only one directory path is inputted
-def valid_init_input(paths):
-    return len(paths) == 1 or len(paths) == 0
 
 
 def init(paths):
