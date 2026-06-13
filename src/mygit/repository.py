@@ -120,6 +120,7 @@ def checkout(commit_id):
     if not Path(path).exists():
         sys.exit("Invalid Commit ID")
 
+
     # Creating/Overwriting files..
     with open(path, 'r') as f:
         contents = json.load(f)
@@ -132,8 +133,9 @@ def checkout(commit_id):
     
     # Removing files/directories not present in the snapshot...
     current_directory_files = list(Path(".").glob("*"))
+    
     for file in current_directory_files:
-        if file not in files and ".mygit" not in str(file):
+        if str(file) not in files and ".mygit" not in str(file):
             if file.is_file():
                 file.unlink()          # remove file
             elif file.is_dir():

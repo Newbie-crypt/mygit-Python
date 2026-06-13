@@ -33,7 +33,7 @@ def main():
             commit(args.message)
 
         case "checkout":
-            checkout(args.commit_id)
+            checkout(args.commit_id[0])
 
         case "log":
             log()
