@@ -14,6 +14,7 @@ def main():
     checkout_parser = subparsers.add_parser("checkout")
     checkout_parser.add_argument("commit_id", nargs=1)
     log_parser = subparsers.add_parser("log")
+    status_parser = subparsers.add_parser("status")
 
     args = parser.parse_args()
     match args.command:

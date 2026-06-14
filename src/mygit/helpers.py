@@ -35,3 +35,54 @@ def empty_index(repo_directory='.'):
         index = json.load(f)
     return not index
 
+def get_HEAD_id(repo_directory):
+    with open(f"{repo_directory}/.mygit/HEAD", 'r') as f:
+        current_commit_id = f.read()
+    return current_commit_id
+
+def get_staged_files(repo_directory):
+    with open(f"{repo_directory}/.mygit/index.json", 'r') as f:
+        contents = json.load(f)
+    return [key for key in contents]
+
+
+# Detect modified files; a file is modified if it's in the HEAD commit, exists in the working directory, its current hash != hash in HEAd,
+        # not staged
+def get_modified_files(repo_directory):
+    current_commit_id = get_HEAD_id(repo_directory)
+    if current_commit_id == "null":
+        return []
+    
+    with open(f"{repo_directory}/.mygit/commits/{current_commit_id}.json", 'r') as f:
+        commit_files = (json.load(f))["files"]
+
+    modified = []
+
+    # Looping through the files in working directory
+    current_directory_files = list(Path(repo_directory).glob("*"))
+    for file in current_directory_files:
+        filename = str(file).split('\\')[-1]
+
+        if filename not in commit_files:
+            continue
+
+        with open(str(file), "rb") as f:
+            contents = f.read()    
+        hash = hashlib.sha256(contents).hexdigest()
+
+        if hash == commit_files[filename]:
+            continue
+
+        with open(f"{repo_directory}/.mygit/index.json", 'r') as f:
+            contents = json.load(f)
+        if filename in contents:
+            continue
+
+        modified.append(filename)
+
+    return modified
+
+
+
+def get_untracked_files(repo_directory):
+    ...

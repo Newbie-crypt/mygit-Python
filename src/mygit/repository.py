@@ -141,8 +141,7 @@ def checkout(commit_id, repo_directory='.'):
 def log(repo_directory='.'):
     is_repository_initialized(repo_directory=repo_directory)
 
-    with open(f"{repo_directory}/.mygit/HEAD", 'r') as f:
-        current_commit_id = f.read()
+    current_commit_id = get_HEAD_id(repo_directory)
     if current_commit_id == "null":
         sys.exit("No commits found")
     
@@ -157,5 +156,33 @@ def log(repo_directory='.'):
         current_commit_id = contents["parent_commit"]
     
 
-def status():
-    ...
+def status(repo_directory='.'):
+    # Check whether repo is initialized
+    # Read HEAD to determine current commit
+    
+    
+    # Untracked files:
+    # exists in the working directory, but not committed or staged
+    # NEVER REPORT OR LOOK INTO .mygit
+    is_repository_initialized(repo_directory=repo_directory)
+
+    staged = get_staged_files(repo_directory) 
+    modified = get_modified_files(repo_directory) 
+    untracked = get_untracked_files(repo_directory) 
+
+    print("Staged:")
+    for file in staged:
+        print(f"\t{file}")
+    print()
+    print("Modified:")
+    for file in modified:
+        print(f"\t{file}")
+    print()
+    print("Untracked:")
+    for file in untracked:
+        print(f"\t{file}")
+
+
+
+
+

@@ -262,6 +262,40 @@ def test_checkout_valid_commitID(tmp_path):
         contents = json.load(f)
     assert not contents
 
+def test_get_staged_files(tmp_path):
+    init([str(tmp_path)])
+    filename = "hello.txt"
+    p = tmp_path / filename
+    p.touch()
+    path = str(p)
+
+    p.write_text("Hello World\n")
+    add([filename], repo_directory=str(tmp_path))
+
+    assert get_staged_files(str(tmp_path)) == ["hello.txt"]
+
+def test_get_modified_files(tmp_path):
+    init([str(tmp_path)])
+    filename = "hello.txt"
+    p = tmp_path / filename
+    p.touch()
+
+    # First commit
+    p.write_text("Hello World\n")
+    add([filename], repo_directory=str(tmp_path))
+    first_commit_id, first_files = commit("first commit", repo_directory=str(tmp_path))
+
+    # Modifying the file..
+    p.write_text("Hello, lad\n")
+
+    filename2 = "hello2.txt"
+    p2 = tmp_path / filename
+    p2.touch()
+
+    assert get_modified_files(str(tmp_path)) == ["hello.txt"]
+
+def test_get_untracked_files():
+    ...
 
 
 
