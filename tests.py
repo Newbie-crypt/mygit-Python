@@ -234,7 +234,6 @@ def test_checkout_valid_commitID(tmp_path):
     p2.touch()
     path2 = str(p2)
 
-
     p.write_text("Hello, again\n")
     p2.write_text("foo, bar\n")
     add([filename, filename2], repo_directory=str(tmp_path))

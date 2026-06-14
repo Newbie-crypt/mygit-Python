@@ -138,8 +138,24 @@ def checkout(commit_id, repo_directory='.'):
     with open(f"{repo_directory}/.mygit/index.json", 'w') as f:
         f.write("{}")
     
-def log():
-    ...
+def log(repo_directory='.'):
+    is_repository_initialized(repo_directory=repo_directory)
+
+    with open(f"{repo_directory}/.mygit/HEAD", 'r') as f:
+        current_commit_id = f.read()
+    if current_commit_id == "null":
+        sys.exit("No commits found")
+    
+    print('\n')
+    while current_commit_id != "null":
+        with open(f"{repo_directory}/.mygit/commits/{current_commit_id}.json", 'r') as f:
+            contents = json.load(f)
+        print(f"commit: {current_commit_id}")
+        print(f"timestamp: {contents["timestamp"]}")
+        print(f"message: {contents["message"][0]}")
+        print("\n\n")
+        current_commit_id = contents["parent_commit"]
+    
 
 def status():
     ...

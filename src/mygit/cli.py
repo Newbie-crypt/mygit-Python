@@ -13,6 +13,7 @@ def main():
     commit_parser.add_argument("message", nargs=1)
     checkout_parser = subparsers.add_parser("checkout")
     checkout_parser.add_argument("commit_id", nargs=1)
+    log_parser = subparsers.add_parser("log")
 
     args = parser.parse_args()
     match args.command:
