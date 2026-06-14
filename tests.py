@@ -214,39 +214,59 @@ def test_checkout_invalid_commitID(tmp_path):
     with pytest.raises(SystemExit):
         checkout("foo", repo_directory=str(tmp_path))
 
-# def test_checkout_valid_commitID(tmp_path):
-#     init([str(tmp_path)])
-#     filename = "hello.txt"
-#     p = tmp_path / filename
-#     p.touch()
-#     path = str(p)
+def test_checkout_valid_commitID(tmp_path):
+    init([str(tmp_path)])
+    filename = "hello.txt"
+    p = tmp_path / filename
+    p.touch()
+    path = str(p)
 
-#     # First commit
-#     p.write_text("Hello World\n")
-#     add([filename], repo_directory=str(tmp_path))
-#     first_commit_id, first_files = commit("first commit", repo_directory=str(tmp_path))
+    # First commit
+    p.write_text("Hello World\n")
+    add([filename], repo_directory=str(tmp_path))
+    first_commit_id, first_files = commit("first commit", repo_directory=str(tmp_path))
 
-#     # Second Commit
+    # Second Commit
 
-#     # Creating a second text file
-#     filename2 = "hello2.txt"
-#     p2 = tmp_path / filename2
-#     p2.touch()
-#     path2 = str(p2)
+    # Creating a second text file
+    filename2 = "hello2.txt"
+    p2 = tmp_path / filename2
+    p2.touch()
+    path2 = str(p2)
 
 
-#     p.write_text("Hello, again\n")
-#     p2.write_text("foo, bar\n")
-#     add([filename, filename2], repo_directory=str(tmp_path))
-#     second_commit_id, second_files = commit("second commit", repo_directory=str(tmp_path))
+    p.write_text("Hello, again\n")
+    p2.write_text("foo, bar\n")
+    add([filename, filename2], repo_directory=str(tmp_path))
+    second_commit_id, second_files = commit("second commit", repo_directory=str(tmp_path))
 
-#     # Checking out the first commit
-#     checkout(first_commit_id, repo_directory=str(tmp_path))
+    # Checking out the first commit
+    checkout(first_commit_id, repo_directory=str(tmp_path))
 
-#     # Checking if the text file has returned to the state of the first commit
-#     with open(path, 'r') as f:
-#         contents = f.read()
-#     assert contents == "Hello World\n"
+    assert p.exists() == True
+
+    # Checking if the text file has returned to the state of the first commit
+    with open(path, 'r') as f:
+        contents = f.read()
+    assert contents == "Hello World\n"
+
+    # Checking if the text file created in the second commit is deleted
+    assert p2.exists() == False
+
+    # Checking if the HEAD stores the ID of the first commit
+    with open(f"{str(tmp_path)}/.mygit/HEAD", 'r') as f:
+        contents = f.read()
+    assert contents == first_commit_id
+
+    # Ensuring that the staging area is cleared
+    with open(f"{str(tmp_path)}/.mygit/index.json", 'r') as f:
+        contents = json.load(f)
+    assert not contents
+
+
+
+
+
 
     
 

@@ -118,18 +118,20 @@ def checkout(commit_id, repo_directory='.'):
     for key in files:
         with open(f"{repo_directory}/.mygit/objects/{files[key]}", "rb") as f:
             input_data = f.read()
-        with open(key, "wb") as f:
+        with open(f"{repo_directory}/{key}", "wb") as f:
             f.write(input_data)
     
     # Removing files/directories not present in the snapshot...
     current_directory_files = list(Path(repo_directory).glob("*"))
+    print(current_directory_files)
+    print(files)
     for file in current_directory_files:
-        if str(file) not in files and ".mygit" not in str(file):
+        if str(file).split('\\')[-1] not in files and ".mygit" not in str(file):
             if file.is_file():
                 file.unlink()          # remove file
             elif file.is_dir():
                 shutil.rmtree(file)  
-    
+
     # Changing the HEAD..
     with open(f"{repo_directory}/.mygit/HEAD", 'w') as f:
         f.write(commit_id)
