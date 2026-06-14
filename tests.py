@@ -42,7 +42,7 @@ def test_files_exist():
     assert files_exist(["tests.py"]) == (True, "null")
     assert files_exist(["foo", "bar"]) == (False, "foo")
 
-def test_correct_use_of_add(tmp_path):
+def test_correct_use_of_add_for_single_file(tmp_path):
     init([str(tmp_path)])
     filename = "hello.txt"
     p = tmp_path / filename
@@ -58,6 +58,42 @@ def test_correct_use_of_add(tmp_path):
     with open(f"{str(tmp_path)}/.mygit/index.json", "r") as f:
         index = json.load(f)
     assert index == {filename: hash}
+
+def test_correct_use_of_add_for_several_files(tmp_path):
+    init([str(tmp_path)])
+
+    # First File
+    filename = "hello.txt"
+    p = tmp_path / filename
+    p.touch()
+    p.write_text("hello")
+
+    # Second File
+    filename2 = "hello2.txt"
+    p2 = tmp_path / filename2
+    p2.touch()
+    p2.write_text("hello2")
+
+    add([filename, filename2], repo_directory=str(tmp_path))
+
+    # Checking if the object file of first txt file exists...
+    with open(str(p), "rb") as f:
+        contents = f.read()
+    hash = hashlib.sha256(contents).hexdigest()
+    output_path = f"{str(tmp_path)}/.mygit/objects/" + hash
+    assert Path(output_path).exists() == True
+
+    # Checking if the object file of second txt file exists...
+    with open(str(p2), "rb") as f:
+        contents = f.read()
+    hash2 = hashlib.sha256(contents).hexdigest()
+    output_path = f"{str(tmp_path)}/.mygit/objects/" + hash2
+    assert Path(output_path).exists() == True
+
+    # Checking if the index file contains both files
+    with open(f"{str(tmp_path)}/.mygit/index.json", "r") as f:
+        index = json.load(f)
+    assert index == {filename: hash, filename2: hash2}
 
 def test_correct_use_of_add_after_updating_staged_file(tmp_path):
     init([str(tmp_path)])
@@ -173,11 +209,45 @@ def test_commit_with_staged_files_with_parent_commit(tmp_path):
             assert contents["files"] == second_files
 
     
-def test_checkout_invalid_commitID():
-    ...
+def test_checkout_invalid_commitID(tmp_path):
+    init([str(tmp_path)])
+    with pytest.raises(SystemExit):
+        checkout("foo", repo_directory=str(tmp_path))
 
-def test_checkout_valid_commitID():
-    ...
+# def test_checkout_valid_commitID(tmp_path):
+#     init([str(tmp_path)])
+#     filename = "hello.txt"
+#     p = tmp_path / filename
+#     p.touch()
+#     path = str(p)
+
+#     # First commit
+#     p.write_text("Hello World\n")
+#     add([filename], repo_directory=str(tmp_path))
+#     first_commit_id, first_files = commit("first commit", repo_directory=str(tmp_path))
+
+#     # Second Commit
+
+#     # Creating a second text file
+#     filename2 = "hello2.txt"
+#     p2 = tmp_path / filename2
+#     p2.touch()
+#     path2 = str(p2)
+
+
+#     p.write_text("Hello, again\n")
+#     p2.write_text("foo, bar\n")
+#     add([filename, filename2], repo_directory=str(tmp_path))
+#     second_commit_id, second_files = commit("second commit", repo_directory=str(tmp_path))
+
+#     # Checking out the first commit
+#     checkout(first_commit_id, repo_directory=str(tmp_path))
+
+#     # Checking if the text file has returned to the state of the first commit
+#     with open(path, 'r') as f:
+#         contents = f.read()
+#     assert contents == "Hello World\n"
+
     
 
     
