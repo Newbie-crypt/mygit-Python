@@ -101,11 +101,11 @@ def commit(message, repo_directory='.'):
     
     
 
-def checkout(commit_id):
-    is_repository_initialized()
+def checkout(commit_id, repo_directory='.'):
+    is_repository_initialized(repo_directory=repo_directory)
 
     # Ensuring the commit id exists..
-    path = f"./.mygit/commits/{commit_id}.json"
+    path = f"{repo_directory}/.mygit/commits/{commit_id}.json"
 
     if not Path(path).exists():
         sys.exit("Invalid Commit ID")
@@ -116,14 +116,13 @@ def checkout(commit_id):
         contents = json.load(f)
     files = contents["files"]
     for key in files:
-        with open(f".mygit/objects/{files[key]}", "rb") as f:
+        with open(f"{repo_directory}/.mygit/objects/{files[key]}", "rb") as f:
             input_data = f.read()
         with open(key, "wb") as f:
             f.write(input_data)
     
     # Removing files/directories not present in the snapshot...
-    current_directory_files = list(Path(".").glob("*"))
-    
+    current_directory_files = list(Path(repo_directory).glob("*"))
     for file in current_directory_files:
         if str(file) not in files and ".mygit" not in str(file):
             if file.is_file():
@@ -132,11 +131,11 @@ def checkout(commit_id):
                 shutil.rmtree(file)  
     
     # Changing the HEAD..
-    with open(".mygit/HEAD", 'w') as f:
+    with open(f"{repo_directory}/.mygit/HEAD", 'w') as f:
         f.write(commit_id)
     
     # Clearing the staging area (index.json)
-    with open(".mygit/index.json", 'w') as f:
+    with open(f"{repo_directory}/.mygit/index.json", 'w') as f:
         f.write("{}")
     
 def log():
@@ -144,6 +143,3 @@ def log():
 
 def status():
     ...
-
-if __name__ == "__main__":
-    main()
