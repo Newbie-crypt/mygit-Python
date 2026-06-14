@@ -78,7 +78,7 @@ def commit(message, repo_directory='.'):
     commit_data = {
         "parent_commit": commit_parent,
         "message": message,
-        "timestamp": datetime.datetime.now().timestamp(),
+        "timestamp": str(datetime.datetime.now()),
         "files": files
     }
 
@@ -123,8 +123,6 @@ def checkout(commit_id, repo_directory='.'):
     
     # Removing files/directories not present in the snapshot...
     current_directory_files = list(Path(repo_directory).glob("*"))
-    print(current_directory_files)
-    print(files)
     for file in current_directory_files:
         if str(file).split('\\')[-1] not in files and ".mygit" not in str(file):
             if file.is_file():
