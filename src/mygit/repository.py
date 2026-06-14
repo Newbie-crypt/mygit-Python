@@ -1,13 +1,14 @@
 from .helpers import *
 
+
 def init(paths):
 
     # If no path is provided, then add the .mygit to the current directory
     if not paths:
-        directory = '.'
+        directory = "."
     else:
         directory = paths[0]
-    
+
     if not Path(directory).exists():
         Path(directory).mkdir()
 
@@ -22,9 +23,9 @@ def init(paths):
         Path(f"{directory}/.mygit/index.json").write_text("{}")
         Path(f"{directory}/.mygit/HEAD").touch()
         Path(f"{directory}/.mygit/HEAD").write_bytes(b"null")
-    
 
-def add(paths, repo_directory='.'):
+
+def add(paths, repo_directory="."):
 
     is_repository_initialized(repo_directory=repo_directory)
 
@@ -32,7 +33,7 @@ def add(paths, repo_directory='.'):
         sys.exit(f"{paths[0]} does not exist.")
 
     for path in paths:
-        path = path.replace("./","").replace(".\\", "")
+        path = path.replace("./", "").replace(".\\", "")
         with open(f"{repo_directory}/{path}", "rb") as file:
             contents = file.read()
         hash = hashlib.sha256(contents).hexdigest()
@@ -45,21 +46,21 @@ def add(paths, repo_directory='.'):
             # Updating the index
             with open(f"{repo_directory}/.mygit/index.json", "r") as f:
                 index = json.load(f)
-            
+
             index[path] = hash
 
             with open(f"{repo_directory}/.mygit/index.json", "w") as f:
                 json.dump(index, f, indent=4)
-    
 
-def commit(message, repo_directory='.'):
+
+def commit(message, repo_directory="."):
     is_repository_initialized(repo_directory=repo_directory)
-    
+
     if empty_index(repo_directory=repo_directory):
         sys.exit("No files present in the staging area.")
-    
+
     # Obtaining the commit parent..
-    with open(f"{repo_directory}/.mygit/HEAD", 'r') as f:
+    with open(f"{repo_directory}/.mygit/HEAD", "r") as f:
         commit_parent = f.read()
 
     # Setting up the files to be committed..
@@ -79,29 +80,28 @@ def commit(message, repo_directory='.'):
         "parent_commit": commit_parent,
         "message": message,
         "timestamp": str(datetime.datetime.now()),
-        "files": files
+        "files": files,
     }
 
     commit_id = hashlib.sha256(json.dumps(commit_data).encode("utf-8")).hexdigest()
 
     # Creating the json file..
-    with open(f"{repo_directory}/.mygit/commits/{commit_id}.json", 'w') as f:
+    with open(f"{repo_directory}/.mygit/commits/{commit_id}.json", "w") as f:
         json.dump(commit_data, f, indent=4)
 
     # Update HEAD
-    with open(f"{repo_directory}/.mygit/HEAD", 'w') as f:
+    with open(f"{repo_directory}/.mygit/HEAD", "w") as f:
         f.write(commit_id)
-    
+
     # Clearing the staging area (index.json)
-    with open(f"{repo_directory}/.mygit/index.json", 'w') as f:
+    with open(f"{repo_directory}/.mygit/index.json", "w") as f:
         f.write("{}")
 
     # Returned for unit testing purposes
     return commit_id, files
-    
-    
 
-def checkout(commit_id, repo_directory='.'):
+
+def checkout(commit_id, repo_directory="."):
     is_repository_initialized(repo_directory=repo_directory)
 
     # Ensuring the commit id exists..
@@ -110,9 +110,8 @@ def checkout(commit_id, repo_directory='.'):
     if not Path(path).exists():
         sys.exit("Invalid Commit ID")
 
-
     # Creating/Overwriting files..
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         contents = json.load(f)
     files = contents["files"]
     for key in files:
@@ -120,55 +119,51 @@ def checkout(commit_id, repo_directory='.'):
             input_data = f.read()
         with open(f"{repo_directory}/{key}", "wb") as f:
             f.write(input_data)
-    
+
     # Removing files/directories not present in the snapshot...
     current_directory_files = list(Path(repo_directory).glob("*"))
     for file in current_directory_files:
-        if str(file).split('\\')[-1] not in files and ".mygit" not in str(file):
+        if str(file).split("\\")[-1] not in files and ".mygit" not in str(file):
             if file.is_file():
-                file.unlink()          # remove file
+                file.unlink()  # remove file
             elif file.is_dir():
-                shutil.rmtree(file)  
+                shutil.rmtree(file)
 
     # Changing the HEAD..
-    with open(f"{repo_directory}/.mygit/HEAD", 'w') as f:
+    with open(f"{repo_directory}/.mygit/HEAD", "w") as f:
         f.write(commit_id)
-    
+
     # Clearing the staging area (index.json)
-    with open(f"{repo_directory}/.mygit/index.json", 'w') as f:
+    with open(f"{repo_directory}/.mygit/index.json", "w") as f:
         f.write("{}")
-    
-def log(repo_directory='.'):
+
+
+def log(repo_directory="."):
     is_repository_initialized(repo_directory=repo_directory)
 
     current_commit_id = get_HEAD_id(repo_directory)
     if current_commit_id == "null":
         sys.exit("No commits found")
-    
-    print('\n')
+
+    print("\n")
     while current_commit_id != "null":
-        with open(f"{repo_directory}/.mygit/commits/{current_commit_id}.json", 'r') as f:
+        with open(
+            f"{repo_directory}/.mygit/commits/{current_commit_id}.json", "r"
+        ) as f:
             contents = json.load(f)
         print(f"commit: {current_commit_id}")
         print(f"timestamp: {contents["timestamp"]}")
         print(f"message: {contents["message"][0]}")
         print("\n\n")
         current_commit_id = contents["parent_commit"]
-    
 
-def status(repo_directory='.'):
-    # Check whether repo is initialized
-    # Read HEAD to determine current commit
-    
-    
-    # Untracked files:
-    # exists in the working directory, but not committed or staged
-    # NEVER REPORT OR LOOK INTO .mygit
+
+def status(repo_directory="."):
     is_repository_initialized(repo_directory=repo_directory)
 
-    staged = get_staged_files(repo_directory) 
-    modified = get_modified_files(repo_directory) 
-    untracked = get_untracked_files(repo_directory) 
+    staged = get_staged_files(repo_directory)
+    modified = get_modified_files(repo_directory)
+    untracked = get_untracked_files(repo_directory)
 
     print("Staged:")
     for file in staged:
@@ -181,8 +176,3 @@ def status(repo_directory='.'):
     print("Untracked:")
     for file in untracked:
         print(f"\t{file}")
-
-
-
-
-

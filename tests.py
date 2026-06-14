@@ -2,9 +2,11 @@ import pytest
 from mygit.repository import *
 from mygit.helpers import *
 
+
 def test_valid_init_inputs():
     assert valid_init_input(["lol"]) == True
     assert valid_init_input(["foo", "bar"]) == False
+
 
 def test_init_current_directory():
     init([])
@@ -16,6 +18,7 @@ def test_init_current_directory():
     assert Path("./.mygit/HEAD").exists()
     shutil.rmtree(".mygit")
 
+
 def test_init_another_directory(tmp_path):
     init([tmp_path])
     with pytest.raises(SystemExit):
@@ -26,10 +29,12 @@ def test_init_another_directory(tmp_path):
     assert Path(f"{tmp_path}/.mygit/HEAD").exists()
     shutil.rmtree(tmp_path)
 
+
 def test_valid_add_input():
     assert valid_add_input([]) == False
     assert valid_add_input(["foo"]) == True
     assert valid_add_input(["foo", "bar"]) == True
+
 
 def test_is_repository_initialized():
     init([])
@@ -38,9 +43,11 @@ def test_is_repository_initialized():
     with pytest.raises(SystemExit):
         is_repository_initialized()
 
+
 def test_files_exist():
     assert files_exist(["tests.py"]) == (True, "null")
     assert files_exist(["foo", "bar"]) == (False, "foo")
+
 
 def test_correct_use_of_add_for_single_file(tmp_path):
     init([str(tmp_path)])
@@ -58,6 +65,7 @@ def test_correct_use_of_add_for_single_file(tmp_path):
     with open(f"{str(tmp_path)}/.mygit/index.json", "r") as f:
         index = json.load(f)
     assert index == {filename: hash}
+
 
 def test_correct_use_of_add_for_several_files(tmp_path):
     init([str(tmp_path)])
@@ -94,6 +102,7 @@ def test_correct_use_of_add_for_several_files(tmp_path):
     with open(f"{str(tmp_path)}/.mygit/index.json", "r") as f:
         index = json.load(f)
     assert index == {filename: hash, filename2: hash2}
+
 
 def test_correct_use_of_add_after_updating_staged_file(tmp_path):
     init([str(tmp_path)])
@@ -144,10 +153,12 @@ def test_empty_index(tmp_path):
     add([filename], repo_directory=str(tmp_path))
     assert empty_index(str(tmp_path)) == False
 
+
 def test_commit_with_no_staged_files(tmp_path):
     init([str(tmp_path)])
     with pytest.raises(SystemExit):
         commit("foo")
+
 
 def test_commit_with_staged_files_with_null_parent_commit(tmp_path):
     init([str(tmp_path)])
@@ -163,21 +174,22 @@ def test_commit_with_staged_files_with_null_parent_commit(tmp_path):
     # Ensuring that the commit json is correct
     commit_files = list(Path(f"{str(tmp_path)}/.mygit/commits").glob("*.json"))
     assert len(commit_files) == 1
-    with open(str(commit_files[0]), 'r') as f:
+    with open(str(commit_files[0]), "r") as f:
         contents = json.load(f)
     assert contents["parent_commit"] == "null"
     assert contents["message"] == commit_message
     assert contents["files"] == files
-    
+
     # Ensuring that the HEAD pointer is updated
-    with open(f"{str(tmp_path)}/.mygit/HEAD", 'r') as f:
+    with open(f"{str(tmp_path)}/.mygit/HEAD", "r") as f:
         id = f.read()
     assert id == commit_id
 
     # Ensuring that the staging area is cleared
-    with open(f"{str(tmp_path)}/.mygit/index.json", 'r') as f:
+    with open(f"{str(tmp_path)}/.mygit/index.json", "r") as f:
         contents = json.load(f)
     assert not contents
+
 
 def test_commit_with_staged_files_with_parent_commit(tmp_path):
     init([str(tmp_path)])
@@ -194,7 +206,9 @@ def test_commit_with_staged_files_with_parent_commit(tmp_path):
     # Second Commit
     p.write_text("Hello, again\n")
     add([filename], repo_directory=str(tmp_path))
-    second_commit_id, second_files = commit("second commit", repo_directory=str(tmp_path))
+    second_commit_id, second_files = commit(
+        "second commit", repo_directory=str(tmp_path)
+    )
 
     # Ensuring that there are two commit files..
     commit_files = list(Path(f"{str(tmp_path)}/.mygit/commits").glob("*.json"))
@@ -202,17 +216,18 @@ def test_commit_with_staged_files_with_parent_commit(tmp_path):
 
     for file in commit_files:
         if second_commit_id in str(file):
-            with open(str(file), 'r') as f:
+            with open(str(file), "r") as f:
                 contents = json.load(f)
             assert contents["parent_commit"] == first_commit_id
             assert contents["message"] == "second commit"
             assert contents["files"] == second_files
 
-    
+
 def test_checkout_invalid_commitID(tmp_path):
     init([str(tmp_path)])
     with pytest.raises(SystemExit):
         checkout("foo", repo_directory=str(tmp_path))
+
 
 def test_checkout_valid_commitID(tmp_path):
     init([str(tmp_path)])
@@ -237,7 +252,9 @@ def test_checkout_valid_commitID(tmp_path):
     p.write_text("Hello, again\n")
     p2.write_text("foo, bar\n")
     add([filename, filename2], repo_directory=str(tmp_path))
-    second_commit_id, second_files = commit("second commit", repo_directory=str(tmp_path))
+    second_commit_id, second_files = commit(
+        "second commit", repo_directory=str(tmp_path)
+    )
 
     # Checking out the first commit
     checkout(first_commit_id, repo_directory=str(tmp_path))
@@ -245,7 +262,7 @@ def test_checkout_valid_commitID(tmp_path):
     assert p.exists() == True
 
     # Checking if the text file has returned to the state of the first commit
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         contents = f.read()
     assert contents == "Hello World\n"
 
@@ -253,14 +270,15 @@ def test_checkout_valid_commitID(tmp_path):
     assert p2.exists() == False
 
     # Checking if the HEAD stores the ID of the first commit
-    with open(f"{str(tmp_path)}/.mygit/HEAD", 'r') as f:
+    with open(f"{str(tmp_path)}/.mygit/HEAD", "r") as f:
         contents = f.read()
     assert contents == first_commit_id
 
     # Ensuring that the staging area is cleared
-    with open(f"{str(tmp_path)}/.mygit/index.json", 'r') as f:
+    with open(f"{str(tmp_path)}/.mygit/index.json", "r") as f:
         contents = json.load(f)
     assert not contents
+
 
 def test_get_staged_files(tmp_path):
     init([str(tmp_path)])
@@ -273,6 +291,7 @@ def test_get_staged_files(tmp_path):
     add([filename], repo_directory=str(tmp_path))
 
     assert get_staged_files(str(tmp_path)) == ["hello.txt"]
+
 
 def test_get_modified_files(tmp_path):
     init([str(tmp_path)])
@@ -294,6 +313,7 @@ def test_get_modified_files(tmp_path):
 
     assert get_modified_files(str(tmp_path)) == ["hello.txt"]
 
+
 def test_get_untracked_files(tmp_path):
     init([str(tmp_path)])
     filename = "hello.txt"
@@ -313,12 +333,3 @@ def test_get_untracked_files(tmp_path):
     p2.touch()
 
     assert get_untracked_files(str(tmp_path)) == ["hello2.txt"]
-
-
-
-
-
-    
-
-    
-
