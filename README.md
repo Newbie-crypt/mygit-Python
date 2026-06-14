@@ -4,14 +4,14 @@ A simplified Git implementation written in Python.
 
 ## Features
 
-- Initialize repositories
-- Stage files
-- Commit Files
-- Checkout Previous commits
-- Check the status of the working directory
+* Initialize repositories
+* Stage files
+* Commit files
+* Check out previous commits
+* View commit history
+* Check the status of the working directory
 
 ## Installation
-
 
 ```bash
 git clone <repo-url>
@@ -24,23 +24,22 @@ pip install -e .
 ```bash
 mygit init
 
-# Add some files and play around before staging them, obviously
+# Add some files and modify them before staging
 mygit add main.py
 
-# Commit them
+# Commit staged changes
 mygit commit "First commit"
-
 ```
 
-To checkout commits:
+To check out a previous commit:
 
 ```bash
 mygit checkout <commit-id>
 ```
 
-Use `mygit log` to check the previous commits
-Use `mygit status` to see the staged, untracked, and modified files in the working directory
+Use `mygit log` to view commit history.
 
+Use `mygit status` to display staged, modified, and untracked files.
 
 ## Project Structure
 
@@ -67,37 +66,73 @@ Run the test suite:
 pytest tests.py
 ```
 
-
 ## Technical Details
 
-### mygit init
+### `mygit init`
 
-When this command is used, the .mygit directory is automatically created. If it's already present, the algorithm is halted to prevent any duplicates from being made. This directory consists of the following items:
--> commits (stores commit-id.json files)
--> objects (stores hashed object files)
--> index.json (stores staged files)
--> HEAD (stores the commit ID of the current HEAD pointer)
+Creates the `.mygit` directory if it does not already exist. If the repository has already been initialized, the command exits without making any changes.
 
-### mygit add (files)
+The `.mygit` directory contains:
 
-When files are added to the staging area, these files' contents are stored in "object" files to be stored in the objects directory in the .mygit folder. The names of these files are hashes of the files' content. Then, the name of the staged files as well as the hashed values are the stored in index.json
+* `commits/` – stores commit metadata files (`<commit-id>.json`)
+* `objects/` – stores object files containing file contents
+* `index.json` – stores the staging area
+* `HEAD` – stores the current commit ID
 
-### mygit commit (message)
+### `mygit add <files>`
 
-Given that there are files in the staging area, a "commit-id".json file is generated in the commits directory. This file stores the timestamp, files in that commit, parent commit ID, and the commit message. The files in that json can be ones that are from previous commits (given that they are not staged), and can be newly staged and modified ones.
+Stages one or more files for the next commit.
 
-### mygit checkout (commit-id)
+When a file is staged:
 
-Using these commit files, we can seamlessly switch between different commits to "time-travel". Since each commit.json stores the files the relevant commit stores, we can use these to generate the relevant files with the help of the object files in the objects/ directory. Any file in the working directory not present in commit.json is removed.
+1. Its contents are read and hashed.
+2. An object file is created in `.mygit/objects/` using the hash as its filename.
+3. The file path and corresponding hash are stored in `index.json`.
 
-### mygit log
+If an identical file has already been stored, the existing object file can be reused.
 
-Since each commit file contains the parent commit id, we can loop through the commit files in a logical order to output the history of commits in the right order.
+### `mygit commit <message>`
 
-### mygit status
+Creates a new commit from the contents of the staging area.
 
-This command outputs the staged, modified, and untracked files. Staged files are easily identified in index.json, modified files are tracked unstaged files whose current hashes ares different from the ones in HEAD, and untracked files are neither in the staging area nor are they in any commit.
+Each commit is stored as a `<commit-id>.json` file inside the `commits/` directory and contains:
 
+* Commit ID
+* Parent commit ID
+* Commit message
+* Timestamp
+* Snapshot of tracked files
 
+The snapshot may contain both:
 
+* Newly staged files
+* Files inherited from previous commits that have not been modified
 
+After a successful commit, `HEAD` is updated to point to the new commit and the staging area is cleared.
+
+### `mygit checkout <commit-id>`
+
+Restores the working directory to match the specified commit.
+
+The commit's file snapshot is loaded, and the corresponding object files are used to recreate each tracked file. Any file in the working directory that is not present in the target commit's snapshot is removed.
+
+This allows users to switch between repository states and effectively "time-travel" through project history.
+
+### `mygit log`
+
+Displays commit history starting from the current `HEAD` commit.
+
+Since every commit stores its parent commit ID, MyGit can traverse the commit chain backwards and display commits in reverse chronological order.
+
+### `mygit status`
+
+Displays the current state of the working directory.
+
+Files are classified into three categories:
+
+* **Staged** – files currently present in `index.json`
+* **Modified** – tracked files whose current contents differ from the version stored in `HEAD`, and which are not staged
+* **Untracked** – files that are neither staged nor tracked by the current commit
+
+```
+```
