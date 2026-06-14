@@ -62,6 +62,8 @@ def get_modified_files(repo_directory):
     current_directory_files = list(Path(repo_directory).glob("*"))
     for file in current_directory_files:
         filename = str(file).split('\\')[-1]
+        if filename == ".mygit":
+            continue
 
         if filename not in commit_files:
             continue
@@ -82,7 +84,29 @@ def get_modified_files(repo_directory):
 
     return modified
 
-
-
 def get_untracked_files(repo_directory):
-    ...
+
+    current_directory_files = list(Path(repo_directory).glob("*"))
+    current_commit_id = get_HEAD_id(repo_directory)
+    if current_commit_id == "null":
+        return [str(file).split('\\')[-1] for file in current_directory_files if str(file).split('\\')[-1] != ".mygit"]
+
+    untracked = []
+
+    with open(f"{repo_directory}/.mygit/commits/{current_commit_id}.json", 'r') as f:
+        commit_files = (json.load(f))["files"]
+
+    # Looping through the files in working directory
+    for file in current_directory_files:
+        filename = str(file).split('\\')[-1]
+        if filename == ".mygit" or filename in commit_files:
+            continue
+
+        with open(f"{repo_directory}/.mygit/index.json", 'r') as f:
+            contents = json.load(f)
+        if filename in contents:
+            continue
+
+        untracked.append(filename)
+    
+    return untracked

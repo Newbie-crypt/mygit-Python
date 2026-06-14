@@ -294,8 +294,25 @@ def test_get_modified_files(tmp_path):
 
     assert get_modified_files(str(tmp_path)) == ["hello.txt"]
 
-def test_get_untracked_files():
-    ...
+def test_get_untracked_files(tmp_path):
+    init([str(tmp_path)])
+    filename = "hello.txt"
+    p = tmp_path / filename
+    p.touch()
+
+    # First commit
+    p.write_text("Hello World\n")
+    add([filename], repo_directory=str(tmp_path))
+    commit("first commit", repo_directory=str(tmp_path))
+
+    # Modifying the file..
+    p.write_text("Hello, lad\n")
+
+    filename2 = "hello2.txt"
+    p2 = tmp_path / filename2
+    p2.touch()
+
+    assert get_untracked_files(str(tmp_path)) == ["hello2.txt"]
 
 
 
